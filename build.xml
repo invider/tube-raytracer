@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+
+<project name="tube" basedir="." default="help">
+    <property name="name" value="tube"/>
+
+    <property name="lib.dir" value="lib"/>
+    <property name="src.dir" value="src"/>
+    <property name="etc.dir" value="etc"/>	
+    <property name="cfg.dir" value="${etc.dir}"/>
+    
+    <property name="out.dir" value="out"/>
+    <property name="doc.dir" value="doc"/>
+    <property name="bin.dir" value="${out.dir}/bin"/>
+
+	<path id="master-classpath">
+	    <fileset dir="${lib.dir}">
+		    <include name="**/*.jar"/>
+	    </fileset>
+	</path>
+
+	<target name="help">
+		<echo message=""/>
+		<echo message="==========================================================="/>
+		<echo message="Tube ray tracing engine build script"/>		
+		<echo message="(C) 2008-2011 Igor Khotin"/>
+		<echo message="==========================================================="/>
+		<echo message=""/>
+		<echo message="Available targets are:"/>
+		<echo message=""/>
+		<echo message="clean   --> Cleans output directories"/>
+		<echo message="compile --> Compiles main Java sources and copy libraries"/>
+		<echo message="version --> Shows version and build information"/>
+		<echo message="doc     --> Generates documentation"/>		
+		<echo message="==========================================================="/>
+		<echo message="fast    --> Fast build" />
+		<echo message="probe   --> Build without versioning" />
+		<echo message="try     --> Fast build/run cycle" />
+		<echo message="build   --> Regular build" />
+		<echo message="run     --> Run the project" />
+		<echo message=""/>
+	</target>
+
+
+	<target name="clean" description="Clean output dirs (bin, doc, out)">
+		<delete dir="${bin.dir}"/>
+		<delete dir="${doc.dir}"/>
+		<delete dir="${out.dir}"/>
+	</target>
+
+
+	<target name="compile" description="Compile source code">
+		<mkdir dir="${bin.dir}"/>
+
+		<!-- Compile project files -->
+		<javac destdir="${bin.dir}" source="1.6" target="1.6" debug="true"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}"/>
+			<classpath refid="master-classpath"/>
+		</javac>
+	</target>
+	
+	<target name="cver" description="increase compile version">
+		<echo message="Compile versioning..."/>	
+		
+		<propertyfile file="${cfg.dir}/app.properties" comment="application build info">
+		  <entry  key="date" type="date" value="now" pattern="yyyy-MM-dd hh:mm"/>
+		  <entry  key="build" type="int" operation="+" value="1"/>
+		</propertyfile>
+	</target>	
+	
+	<target name="bver" description="increase build version">
+		<echo message="Build versioning..."/>	
+		
+		<propertyfile file="${cfg.dir}/app.properties" comment="application build info">
+		  <entry  key="date" type="date" value="now" pattern="yyyy-MM-dd hh:mm"/>
+		  <entry  key="subversion" type="int" operation="+" value="1"/>
+		</propertyfile>
+	</target>
+	
+	<target name="version" description="get application version info">
+		<loadproperties srcFile="${cfg.dir}/app.properties"/>
+		
+		<echo message="app: ${app}"/>
+		<echo message="version: ${version}.${subversion}"/>
+		<echo message="build: #${build}"/>
+		<echo message="date: ${date}"/>
+	</target>
+	
+	<target name="doc" description="Create complete Javadoc documentation">
+		<mkdir dir="${doc.dir}"/>
+		
+	    <javadoc
+	        destdir="${doc.dir}"
+	        author="true"
+	        version="true"
+	        use="true"
+	        windowtitle="${ant.project.name}"
+	        sourcepath="${src.dir}"
+	        classpath="${bin.dir}"
+	    	classpathref="master-classpath"
+	        packagenames="*"
+	        verbose="false">
+	        <doctitle><![CDATA[<h1>${ant.project.name}</h1>]]></doctitle>
+	        <bottom>
+	            <![CDATA[<i>Copyright &#169; 2008 by Igor Khotin<br>All Rights Reserved.</i>]]>
+	        </bottom>
+	        <tag name="todo" scope="all" description="To do:"/>
+	    </javadoc>
+	</target>
+    
+    <target name="run" description="Run the application">
+        <java
+           classname="org.tube.Tube"
+           dir="${bin.dir}"
+           fork="true"
+           failonerror="true"
+           maxmemory="128m"/>
+    </target>
+    
+    <target name="test" description="Run the test code">
+	<java
+	    classname="org.tube.test.ReflectionTest"
+	    dir="${bin.dir}"
+	    fork="true"
+	    failonerror="true"
+	    maxmemory="128m"/>
+    </target>
+
+
+	<!-- Batch tasks -->
+	
+	<target name="fast" depends="clean,compile,version"
+			description="Fast integration"/>
+    
+	<target name="probe" depends="clean,compile,doc,version"
+		description="Probe integration"/>
+	
+	<target name="try" depends="fast,run"
+		description="Fast integration/run cycle"/>
+	
+	<target name="build" depends="clean,compile,doc,cver,bver,version"
+		description="Full build integration"/>
+	
+</project>
