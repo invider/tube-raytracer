@@ -18,7 +18,7 @@ import org.tube.scene.primitive.Primitive;
 public class Tracer {
     //>>>>>>>>>>>>>>>>>>>>>>
     //debug values
-	public double dlx = -50;
+	public double dlx = -250;
     public int dflag;
     //>>>>>>>>>>>>>>>>>>>>>>
     
@@ -40,29 +40,19 @@ public class Tracer {
     }
     
     /**
-     * Renders image of the scene
+     * Renders the scene
      */
-    private int dx, dy;
+    private int dx, dy; // debug x and y
     public int[] render() {
-    	/*
-        int pos = 0;
-        this.raw = new int[width * height];
-        
-        for (int y = 0; y < height; y++)
-            for (int x = 0; x < width; x++) {
-                raw[pos++] = 0xff6000 << 8 | x;
-            	//raw[pos++] = 0xff000000;
-            }
-        */
-        
         // debug
         dflag = 0;
     	
     	// create new canvas
     	this.raw = new int[width * height];
     	
+        // TODO refactor hard-coded camera!
        	// camera focus distance
-    	double fov = 250;
+    	double fov = 400;
     	Vector3 cameraOrigin = new Vector3(0, 0, 0);
     	
     	// fire single ray for each pixel of image
@@ -96,9 +86,10 @@ public class Tracer {
     {    	
         if( depth > maxReflectionDepth ) return new Color(0,0,0);
         
+        // TODO light source is created for each ray? Not a good idea!
         //Color ambientLightColor = new Color(.1f, .1f, .1f);
         Color dirLightColor = new Color(1d, 1d, 1d);
-        Vector3 lightSource = new Vector3(dlx, 0, -20);
+        Vector3 lightSource = new Vector3(dlx, 0, 10);
         //lightSource.normalize();
         
         // ********************************************************************

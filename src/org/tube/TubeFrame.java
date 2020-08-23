@@ -24,8 +24,12 @@ import com.colliderlabs.stub.image.TargaImageAdapter;
  */
 public class TubeFrame extends Frame implements WindowListener, MouseListener {
 	// renders 
-    int width = 800;
+    int width = 600;
     int height = 600;
+    int renderCount = 0;
+
+    int borderX = 0;
+    int borderY = 0;
     
     Image imgBackground;    
     
@@ -50,14 +54,23 @@ public class TubeFrame extends Frame implements WindowListener, MouseListener {
         // create a render
         this.tracer = new Tracer(scene);
       
-        this.tracer.createDisplay(400, 400);
+        this.tracer.createDisplay(600, 600);
+        this.centerFrame();
     }
-    
 
+    private void centerFrame() {
+            Dimension windowSize = getSize();
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            Point centerPoint = ge.getCenterPoint();
+
+            int dx = centerPoint.x - windowSize.width / 2;
+            int dy = centerPoint.y - windowSize.height / 2;    
+            this.setLocation(dx, dy);
+    }
     
     public void paint(Graphics g) {        
         g.drawImage(imgBackground, 0, 0, this);
-        g.drawImage(imgRender, 20, 40, this);
+        g.drawImage(imgRender, this.borderX, this.borderY, this);
     }
             
     @Override
@@ -65,8 +78,6 @@ public class TubeFrame extends Frame implements WindowListener, MouseListener {
 		//super.repaint();
 		this.paint(this.getGraphics());
 	}
-
-
 
 	public void windowOpened(WindowEvent e) {}
     
@@ -90,7 +101,7 @@ public class TubeFrame extends Frame implements WindowListener, MouseListener {
     public void mouseClicked(MouseEvent e) {}
     
     public void mousePressed(MouseEvent e) {
-        System.out.println("rendering...");
+        System.out.println("rendering #" + this.renderCount++);
         
         generateRender();
         this.repaint();
@@ -107,7 +118,7 @@ public class TubeFrame extends Frame implements WindowListener, MouseListener {
      */
     private void generateRender() {    	
     	int[] raw = this.tracer.render();
-    	this.tracer.dlx += 10;
+    	this.tracer.dlx += 100; // move the light source vector
     	    	
     	imgRender = this.createImage(new MemoryImageSource(
     	            	tracer.width, tracer.height, raw, 0, tracer.height));
